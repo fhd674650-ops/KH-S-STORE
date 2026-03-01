@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>KH'S STORE</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<style>
+:root{
+--pink1:#ffe6ef;--pink2:#ffc1d6;--pink3:#ff9fc3;--pink4:#e91e63;
+--deep:#880e4f;--text:#6b2e3c;--shadow:0 10px 30px rgba(233,30,99,.25);
+--glow:0 0 25px rgba(255,182,213,.8);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:Poppins,sans-serif;background:radial-gradient(circle at top,#fff,#ffe6ef);color:var(--text)}
+
+header{padding:15px 25px;display:flex;justify-content:space-between;align-items:center}
+.navbar{display:flex;align-items:center;gap:12px}
+.logo-img{width:50px;height:50px;border-radius:50%;object-fit:cover;box-shadow:var(--glow)}
+.logo-text{font-size:22px;font-weight:700;color:var(--deep)}
+
+.cart-icon{font-size:26px;cursor:pointer;position:relative}
+.cart-count{position:absolute;top:-6px;right:-8px;background:red;color:white;border-radius:50%;padding:2px 6px;font-size:12px}
+
+.owner-btn,.admin-btn,.pass-btn,.slider-btn{
+position:fixed;right:20px;padding:10px 16px;border:none;border-radius:30px;
+color:#fff;cursor:pointer;display:none;z-index:9999;box-shadow:var(--glow)
+}
+.owner-btn{bottom:20px;background:#880e4f}
+.admin-btn{bottom:70px;background:#d81b60}
+.pass-btn{bottom:120px;background:#4a148c}
+.slider-btn{bottom:170px;background:#00695c}
+
+/* Welcome */
+.welcome{
+display:flex;justify-content:space-between;align-items:center;
+padding:20px;background:linear-gradient(135deg,#fff,#ffe6ef);
+border-radius:0 0 30px 30px;box-shadow:var(--shadow)
+}
+.welcome img{width:120px;border-radius:15px;box-shadow:var(--glow)}
+
+.section{padding:20px}
+.search-box{width:100%;max-width:400px;padding:10px 15px;border-radius:25px;border:1px solid #f48fb1}
+
+.section-title{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+
+.category-grid,.product-grid{
+display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:20px
+}
+.category-card,.product-card{
+background:linear-gradient(#fff,#fff0f6);
+border-radius:25px;box-shadow:var(--shadow);
+padding:15px;text-align:center;cursor:pointer;position:relative
+}
+.product-card img{width:100%;height:150px;object-fit:contain}
+.badge{position:absolute;top:10px;left:10px;background:#e91e63;color:#fff;padding:4px 10px;border-radius:20px;font-size:12px}
+.btn{
+background:linear-gradient(45deg,var(--pink3),var(--pink4));
+border:none;color:#fff;padding:7px 14px;border-radius:20px;cursor:pointer;margin:3px
+}
+
+/* FANCY SLIDER */
+#heroSlider{
+display:none;
+max-width:520px;
+margin:20px auto;
+position:relative;
+overflow:hidden;
+border-radius:25px;
+box-shadow:0 15px 40px rgba(233,30,99,.35);
+}
+.slide{
+display:none;
+width:100%;
+border-radius:25px;
+animation:fadeZoom 1s ease;
+}
+.slide.active{display:block}
+
+@keyframes fadeZoom{
+from{opacity:0;transform:scale(1.05)}
+to{opacity:1;transform:scale(1)}
+}
+.dots{
+position:absolute;
+bottom:10px;
+width:100%;
+text-align:center;
+}
+.dot{
+height:10px;width:10px;
+background:#ffc1d6;
+display:inline-block;
+border-radius:50%;
+margin:0 4px;
+cursor:pointer;
+}
+.dot.active{background:#e91e63}
+
+/* Modal */
+.modal{
+position:fixed;top:0;left:0;width:100%;height:100%;
+background:rgba(255,192,203,.6);
+display:none;align-items:center;justify-content:center
+}
+.box{background:#fff;padding:20px;border-radius:18px;width:320px}
+</style>
+</head>
+
+<body>
+
+<header>
+<div class="navbar">
+<img src="hero.png" class="logo-img">
+<div class="logo-text">KH's Store</div>
+</div>
+<div class="cart-icon" onclick="openCart()">🛒
+<span id="cartCount" class="cart-count">0</span>
+</div>
+</header>
+
+<section class="welcome">
+<div>
+<h2>Welcome to KH's Store</h2>
+<p>Discover trending beauty products</p>
+</div>
+<img src="hero.png">
+</section>
+
+<section class="section" id="heroSlider">
+<img src="hero1.png" class="slide active">
+<img src="hero2.png" class="slide">
+<img src="hero3.png" class="slide">
+<div class="dots" id="dots"></div>
+</section>
+
+<section class="section">
+<input type="text" id="searchInput" class="search-box" placeholder="Search product..." onkeyup="renderProducts()">
+</section>
+
+<section class="section">
+<div class="section-title">
+<h3>Shop by Category</h3>
+<span style="cursor:pointer" onclick="filterCategory('All')">👁 View All</span>
+</div>
+
+<div class="category-grid">
+<div class="category-card" onclick="filterCategory('Skincare')">Skincare</div>
+<div class="category-card" onclick="filterCategory('Makeup')">Makeup</div>
+<div class="category-card" onclick="filterCategory('Fragrance')">Fragrance</div>
+<div class="category-card" onclick="filterCategory('Nails')">Nails</div>
+</div>
+</section>
+
+<section class="section">
+<div id="products" class="product-grid"></div>
+</section>
+
+<button class="owner-btn" id="ownerBtn" onclick="openLogin()">Owner Login</button>
+<button class="admin-btn" id="adminBtn" onclick="openAdmin()">Add Product</button>
+<button class="pass-btn" id="passBtn" onclick="openPass()">Change Password</button>
+<button class="slider-btn" id="sliderBtn" onclick="toggleSlider()">Enable Slider</button>
+
+<!-- LOGIN -->
+<div class="modal" id="loginModal">
+<div class="box">
+<h3>Owner Login</h3>
+<div style="display:flex;align-items:center;gap:6px">
+<input type="password" id="ownerPass" placeholder="Password" style="flex:1">
+<span onclick="togglePass('ownerPass',this)" style="cursor:pointer">👁</span>
+</div>
+<button class="btn" onclick="checkLogin()">Login</button>
+</div>
+</div>
+
+<!-- ADD PRODUCT -->
+<div class="modal" id="adminModal">
+<div class="box">
+<h3>Add Product</h3>
+<input id="pname" placeholder="Name">
+<select id="pcat"><option>Skincare</option><option>Makeup</option><option>Fragrance</option><option>Nails</option></select>
+<select id="ptrend"><option value="yes">Trending</option><option value="no">Normal</option></select>
+<input type="file" id="pimg">
+<input id="pprice" placeholder="Price">
+<input id="plink" placeholder="Affiliate Link">
+<button class="btn" onclick="saveProduct()">Save</button>
+<button class="btn" style="background:#aaa" onclick="closeAdmin()">Cancel</button>
+</div>
+</div>
+
+<!-- CHANGE PASSWORD -->
+<div class="modal" id="passModal">
+<div class="box">
+<h3>Change Password</h3>
+<div style="display:flex;align-items:center;gap:6px">
+<input type="password" id="oldPass" placeholder="Old" style="flex:1">
+<span onclick="togglePass('oldPass',this)" style="cursor:pointer">👁</span>
+</div>
+<div style="display:flex;align-items:center;gap:6px">
+<input type="password" id="newPass" placeholder="New" style="flex:1">
+<span onclick="togglePass('newPass',this)" style="cursor:pointer">👁</span>
+</div>
+<button class="btn" onclick="changePassword()">Save</button>
+</div>
+</div>
+
+<!-- CART -->
+<div class="modal" id="cartModal">
+<div class="box">
+<h3>Your Cart</h3>
+<div id="cartItems"></div>
+<h4>Total: <span id="cartTotal">0</span></h4>
+<button class="btn" onclick="checkout()">Checkout</button>
+<button class="btn" onclick="closeCart()">Close</button>
+</div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+<script>
+const firebaseConfig={apiKey:"AIzaSyD6-g1KQ8NUcHfJNQJCu0WNXb-yfwwyG8o",authDomain:"kh-s-store.firebaseapp.com",projectId:"kh-s-store"};
+firebase.initializeApp(firebaseConfig);
+const db=firebase.firestore();
+
+let isOwner=false,cart=JSON.parse(localStorage.getItem("cart"))||[],currentCategory="All";
+
+/* 🔧 SIRF SLIDER FIX */
+let sliderEnabled = localStorage.getItem("sliderEnabled") === "true";
+let slideIndex=0,slideTimer;
+/* 🔧 yahin tak change */
+
+document.addEventListener("keydown",e=>{
+ if(e.ctrlKey&&e.key==="l"){ownerBtn.style.display="block";alert("Owner Login Enabled")}
+});
+
+function togglePass(id,el){
+ let inp=document.getElementById(id);
+ if(inp.type==="password"){inp.type="text";el.innerText="🙈";}
+ else{inp.type="password";el.innerText="👁";}
+}
+
+function openLogin(){loginModal.style.display="flex"}
+function openAdmin(){adminModal.style.display="flex"}
+function openPass(){passModal.style.display="flex"}
+function closeAdmin(){adminModal.style.display="none"}
+
+async function checkLogin(){
+ let doc=await db.collection("settings").doc("owner").get();
+ let pass=doc.exists?doc.data().password:"1234";
+ if(ownerPass.value===pass){
+  isOwner=true;
+  adminBtn.style.display="block";
+  passBtn.style.display="block";
+  sliderBtn.style.display="block";
+  ownerBtn.style.display="none";
+  loginModal.style.display="none";
+  renderProducts();
+ } else alert("Wrong password");
+}
+
+async function changePassword(){
+ let doc=await db.collection("settings").doc("owner").get();
+ let pass=doc.exists?doc.data().password:"1234";
+ if(oldPass.value!==pass){alert("Old wrong");return;}
+ await db.collection("settings").doc("owner").set({password:newPass.value});
+ alert("Password changed");
+}
+
+async function saveProduct(){
+ let file=pimg.files[0];
+ let r=new FileReader();
+ r.onload=async e=>{
+  await db.collection("products").add({
+   name:pname.value,category:pcat.value,trending:ptrend.value,
+   img:e.target.result,price:pprice.value,link:plink.value
+  });
+  adminModal.style.display="none";
+  renderProducts();
+ };
+ r.readAsDataURL(file);
+}
+
+async function deleteProduct(id){
+ await db.collection("products").doc(id).delete();
+ renderProducts();
+}
+
+function saveCart(){localStorage.setItem("cart",JSON.stringify(cart));updateCartCount()}
+function updateCartCount(){cartCount.innerText=cart.reduce((a,b)=>a+b.qty,0)}
+function addToCart(p){let f=cart.find(i=>i.name===p.name);if(f)f.qty++;else cart.push({...p,qty:1});saveCart()}
+function openCart(){cartModal.style.display="flex";renderCart()}
+function closeCart(){cartModal.style.display="none"}
+function renderCart(){
+ cartItems.innerHTML="";let t=0;
+ cart.forEach((p,i)=>{t+=p.qty*parseFloat(p.price);
+ cartItems.innerHTML+=`${p.name} (${p.qty}) <button onclick="removeFromCart(${i})">❌</button><br>`});
+ cartTotal.innerText=t.toFixed(2);
+}
+function removeFromCart(i){cart.splice(i,1);saveCart();renderCart()}
+function checkout(){if(cart.length)window.open(cart[0].link,"_blank")}
+
+function filterCategory(cat){currentCategory=cat;renderProducts()}
+
+async function renderProducts(){
+ products.innerHTML="";
+ let search=searchInput.value.toLowerCase();
+ let snap=await db.collection("products").get();
+ snap.forEach(doc=>{
+  let p=doc.data();
+  if(currentCategory!=="All"&&p.category!==currentCategory)return;
+  if(!p.name.toLowerCase().includes(search))return;
+  products.innerHTML+=`
+  <div class="product-card">
+   ${p.trending==="yes"?`<div class="badge">Trending</div>`:""}
+   <img src="${p.img}">
+   <h3>${p.name}</h3>
+   <div>${p.price}</div>
+   <button class="btn" onclick='addToCart(${JSON.stringify(p)})'>Add to Cart</button>
+   <a href="${p.link}" target="_blank"><button class="btn">Buy Now</button></a>
+   ${isOwner?`<button class="btn" style="background:red" onclick="deleteProduct('${doc.id}')">Delete</button>`:""}
+  </div>`;
+ });
+ updateCartCount();
+}
+renderProducts();
+
+/* SLIDER */
+function toggleSlider(){
+ sliderEnabled = !sliderEnabled;
+ localStorage.setItem("sliderEnabled", sliderEnabled);
+
+ sliderBtn.innerText=sliderEnabled?"Disable Slider":"Enable Slider";
+ if(sliderEnabled){
+   heroSlider.style.display="block";
+   startSlider();
+ }else{
+   stopSlider();
+   heroSlider.style.display="none";
+ }
+}
+function startSlider(){
+ let slides=document.querySelectorAll(".slide");
+ let dotsBox=document.getElementById("dots");
+ dotsBox.innerHTML="";
+
+ slides.forEach((s,i)=>{
+   let d=document.createElement("span");
+   d.className="dot"+(i===0?" active":"");
+   d.onclick=()=>showSlide(i);
+   dotsBox.appendChild(d);
+ });
+
+ showSlide(0);
+
+ slideTimer=setInterval(()=>{
+  showSlide((slideIndex+1)%slides.length);
+ },3000);
+}
+function showSlide(i){
+ let slides=document.querySelectorAll(".slide");
+ let dots=document.querySelectorAll(".dot");
+
+ slides.forEach(s=>s.classList.remove("active"));
+ dots.forEach(d=>d.classList.remove("active"));
+
+ slides[i].classList.add("active");
+ dots[i].classList.add("active");
+ slideIndex=i;
+}
+function stopSlider(){clearInterval(slideTimer)}
+
+/* 🔧 SLIDER RESTORE ON REFRESH */
+if(sliderEnabled){
+ heroSlider.style.display="block";
+ sliderBtn.innerText="Disable Slider";
+ startSlider();
+}
+</script>
+
+</body>
+</html>
